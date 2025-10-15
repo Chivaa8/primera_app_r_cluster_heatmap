@@ -1,137 +1,167 @@
-# app.R
+# ============================================
+#  CLUSTER HEATMAP INTERACTIVO
+#  Autor: Oriol Chiva Hidalgo
+#  Descripción: Visualización avanzada de matrices
+#  de expresión génica mediante clustering jerárquico.
+# ============================================
+
 library(shiny)
 library(pheatmap)
 library(DT)
 library(ggplot2)
+library(bslib)
+library(shinycssloaders)
 
-
-#INTERFAZ DE USUARIO
-
+# -----------------------------
+# UI (interfaz de usuario)
+# -----------------------------
 ui <- fluidPage(
-  titlePanel("Cluster Heatmap"),
+  theme = bs_theme(
+    version = 5,
+    bootswatch = "cosmo",
+    base_font = font_google("Roboto"),
+    heading_font = font_google("Lato"),
+    bg = "#0f1116",
+    fg = "#f0f0f0",
+    primary = "#4DB6AC"
+  ),
+  
+  titlePanel("🧬 Cluster Heatmap Interactivo"),
   
   sidebarLayout(
     sidebarPanel(
-      fileInput("archivo", "Sube tu matriz de expresión (CSV)", accept = ".csv"),
+      fileInput("archivo", "📂 Sube tu matriz de expresión (.csv)", accept = ".csv"),
       
       checkboxInput("escalar", "Escalar filas (Z-score)", value = TRUE),
       
-      selectInput("paleta", "Paleta de colores:",
+      selectInput("paleta", "🎨 Paleta de colores:",
                   choices = c("Verde-Rojo" = "greenred",
                               "Azul-Blanco-Rojo" = "bwr",
                               "Azul-Amarillo-Rojo" = "ayr")),
       
-      textInput("titulo", "Título del Heatmap:", 
+      selectInput("clust_metodo", "Método de clustering:",
+                  choices = c("Complete", "Ward.D2", "Average", "Single")),
+      
+      selectInput("distancia", "Métrica de distancia:",
+                  choices = c("Euclidean", "Correlation", "Maximum", "Manhattan")),
+      
+      textInput("titulo", "🧠 Título del Heatmap:", 
                 value = "Cluster Heatmap de expresión génica"),
       
-      sliderInput("width", "Ancho (px):", min = 300, max = 6000, value = 800, step = 100),
-      sliderInput("height", "Alto (px):", min = 300, max = 6000, value = 800, step = 100),
-      sliderInput("res", "Resolución (dpi):", min = 72, max = 600, value = 150, step = 10),
+      sliderInput("width", "Ancho (px):", min = 600, max = 4000, value = 1000, step = 100),
+      sliderInput("height", "Alto (px):", min = 600, max = 4000, value = 1000, step = 100),
+      sliderInput("res", "Resolución (dpi):", min = 72, max = 600, value = 200, step = 10),
       
       hr(),
-      downloadButton("descargar_png", "Descargar PNG"),
-      downloadButton("descargar_pdf", "Descargar PDF"),
-      downloadButton("descargar_csv", "Descargar CSV"),
-      
+      downloadButton("descargar_png", "💾 Descargar PNG"),
+      downloadButton("descargar_pdf", "📑 Descargar PDF"),
+      downloadButton("descargar_csv", "🧾 Descargar CSV"),
       br(), br(),
-      actionButton("procesar", "Generar Heatmap")
+      actionButton("procesar", "⚡ Generar Heatmap", class = "btn-success")
     ),
     
     mainPanel(
-      h3("Vista previa de los datos"),
-      DTOutput("tabla"),
-      br(),
-      h3("Cluster Heatmap"),
-      imageOutput("heatmap_zoom", height = "auto", width = "100%")
+      tabsetPanel(
+        tabPanel("Vista de datos",
+                 br(),
+                 withSpinner(DTOutput("tabla"), color = "#4DB6AC")),
+        
+        tabPanel("Heatmap interactivo",
+                 br(),
+                 withSpinner(imageOutput("heatmap_zoom", height = "auto", width = "100%"), color = "#4DB6AC")),
+        
+        tabPanel("Acerca de",
+                 br(),
+                 HTML("<h4>🧬 Acerca de esta app</h4>
+                      <p>Esta aplicación permite explorar y visualizar matrices de expresión génica 
+                      usando clustering jerárquico. Es ideal para análisis de transcriptómica, proteómica
+                      o cualquier tipo de datos omicos tabulares.</p>
+                      <p><b>Autor:</b> Oriol Chiva Hidalgo<br>
+                      <b>Versión:</b> 3.0<br>
+                      <b>Licencia:</b> MIT</p>"))
+      )
     )
   )
 )
 
-#LÓGICA DEL SERVIDOR
-
+# -----------------------------
+# SERVER (lógica de backend)
+# -----------------------------
 server <- function(input, output) {
   
-  # Reactivo: leer archivo cuando se carga
   datos <- reactive({
     req(input$archivo)
     read.csv(input$archivo$datapath, row.names = 1)
   })
   
-  # Mostrar tabla completa con navegación
   output$tabla <- renderDT({
     datatable(datos(), options = list(pageLength = 10, scrollX = TRUE))
   })
   
-  # Función auxiliar para generar el heatmap y guardarlo si hace falta
-  generar_heatmap <- function(file = NULL, format = "screen") {
+  generar_heatmap <- function(file = NULL, format = "screen",
+                              width_px = 1000, height_px = 1000, res_dpi = 200) {
     matriz <- as.matrix(datos())
+    if (input$escalar) matriz <- t(scale(t(matriz)))
     
-    # Escalado opcional
-    if (input$escalar) {
-      matriz <- t(scale(t(matriz)))
-    }
-    
-    # Paleta
     colores <- switch(input$paleta,
                       "greenred" = colorRampPalette(c("green", "black", "red"))(100),
                       "bwr" = colorRampPalette(c("blue", "white", "red"))(100),
                       "ayr" = colorRampPalette(c("blue", "yellow", "red"))(100))
     
-    # Si se va a exportar a archivo, usar pheatmap normal
     if (!is.null(file)) {
       if (format == "pdf") {
-        pdf(file, width = input$width/100, height = input$height/100)
+        pdf(file, width = width_px / res_dpi, height = height_px / res_dpi)
       } else if (format == "png") {
-        png(file, width = input$width, height = input$height, res = input$res)
+        png(file, width = width_px, height = height_px, units = "px", res = res_dpi)
       }
       pheatmap(matriz,
                color = colores,
-               clustering_distance_rows = "euclidean",
-               clustering_distance_cols = "euclidean",
-               clustering_method = "complete",
+               clustering_distance_rows = input$distancia,
+               clustering_distance_cols = input$distancia,
+               clustering_method = input$clust_metodo,
                main = input$titulo)
       dev.off()
     } else {
-      # Si es para pantalla, usar renderizado temporal
       outfile <- tempfile(fileext = ".png")
-      png(outfile, width = input$width, height = input$height, res = input$res)
+      png(outfile, width = width_px, height = height_px, units = "px", res = res_dpi)
       pheatmap(matriz,
                color = colores,
-               clustering_distance_rows = "euclidean",
-               clustering_distance_cols = "euclidean",
-               clustering_method = "complete",
+               clustering_distance_rows = input$distancia,
+               clustering_distance_cols = input$distancia,
+               clustering_method = input$clust_metodo,
                main = input$titulo)
       dev.off()
       outfile
     }
   }
   
-  # Generar imagen reactiva cuando se pulsa "procesar"
   observeEvent(input$procesar, {
     output$heatmap_zoom <- renderImage({
-      list(src = generar_heatmap(), contentType = "image/png", width = "100%")
+      list(src = generar_heatmap(width_px = input$width,
+                                 height_px = input$height,
+                                 res_dpi = input$res),
+           contentType = "image/png",
+           width = "100%")
     }, deleteFile = TRUE)
   })
   
-  # Botones de descarga
   output$descargar_png <- downloadHandler(
     filename = function() { "cluster_heatmap.png" },
-    content = function(file) { generar_heatmap(file, "png") }
+    content = function(file) { generar_heatmap(file, "png", input$width, input$height, input$res) }
   )
   
   output$descargar_pdf <- downloadHandler(
     filename = function() { "cluster_heatmap.pdf" },
-    content = function(file) { generar_heatmap(file, "pdf") }
+    content = function(file) { generar_heatmap(file, "pdf", input$width, input$height, input$res) }
   )
   
   output$descargar_csv <- downloadHandler(
-    filename = function() { "datos_filtrados.csv" },
-    content = function(file) {
-      write.csv(datos(), file)
-    }
+    filename = function() { "datos.csv" },
+    content = function(file) { write.csv(datos(), file) }
   )
 }
 
-#EJECUTAR LA APP
-
+# -----------------------------
+# Ejecutar la app
+# -----------------------------
 shinyApp(ui = ui, server = server)
