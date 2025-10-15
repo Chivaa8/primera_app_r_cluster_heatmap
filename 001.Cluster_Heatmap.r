@@ -48,9 +48,9 @@ ui <- fluidPage(
       textInput("titulo", "🧠 Título del Heatmap:", 
                 value = "Cluster Heatmap de expresión génica"),
       
-      sliderInput("width", "Ancho (px):", min = 600, max = 4000, value = 1000, step = 100),
-      sliderInput("height", "Alto (px):", min = 600, max = 4000, value = 1000, step = 100),
-      sliderInput("res", "Resolución (dpi):", min = 72, max = 600, value = 200, step = 10),
+      sliderInput("width", "Ancho (PX:", min = 600, max = 4000, value = 1000, step = 100),
+      sliderInput("height", "Alto (PX):", min = 600, max = 4000, value = 1000, step = 100),
+      sliderInput("res", "Resolución (DPI):", min = 72, max = 600, value = 200, step = 10),
       
       hr(),
       downloadButton("descargar_png", "💾 Descargar PNG"),
