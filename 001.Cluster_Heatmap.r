@@ -24,6 +24,7 @@ ui <- fluidPage(
     bg = "#0f1116",
     fg = "#f0f0f0",
     primary = "#4DB6AC"
+    
   ),
   
   titlePanel("🧬 Cluster Heatmap Interactivo"),
@@ -40,10 +41,10 @@ ui <- fluidPage(
                               "Azul-Amarillo-Rojo" = "ayr")),
       
       selectInput("clust_metodo", "Método de clustering:",
-                  choices = c("Complete", "Ward.D2", "Average", "Single")),
+                  choices = c("complete", "ward.D2", "average", "single")),
       
       selectInput("distancia", "Métrica de distancia:",
-                  choices = c("Euclidean", "Correlation", "Maximum", "Manhattan")),
+                  choices = c("euclidean", "correlation", "maximum", "manhattan")),
       
       textInput("titulo", "🧠 Título del Heatmap:", 
                 value = "Cluster Heatmap de expresión génica"),
@@ -95,7 +96,31 @@ server <- function(input, output) {
   })
   
   output$tabla <- renderDT({
-    datatable(datos(), options = list(pageLength = 10, scrollX = TRUE))
+    datatable(
+      datos(),
+      extensions = "Buttons",
+      options = list(
+        dom = '<"top"lfB>rt<"bottom"ip>',  # l=length, f=filter, B=buttons, t=table, i=info, p=paging
+        buttons = list(
+          list(extend = "copy", text = "📋 Copiar")
+        ),
+        pageLength = 10,
+        lengthMenu = list(c(10, 25, 50, 100), c("10", "25", "50", "100")),
+        scrollX = TRUE,
+        searching = TRUE,
+        ordering = TRUE,
+        autoWidth = TRUE,
+        language = list(
+          lengthMenu = "Mostrar _MENU_ filas por página",
+          search = "Buscar:",
+          info = "Mostrando _START_ a _END_ de _TOTAL_ registros",
+          paginate = list(previous = "Anterior", `next` = "Siguiente"),  # <-- `next` entre backticks o comillas
+          buttons = list(copyTitle = "Copiado al portapapeles")
+        )
+      ),
+      filter = "top",
+      rownames = TRUE
+    )
   })
   
   generar_heatmap <- function(file = NULL, format = "screen",
