@@ -41,7 +41,7 @@ bioinfo-heatmap-app/
 ### 1️⃣ Instala los paquetes necesarios:
 
 ```r
-install.packages(c("shiny", "pheatmap", "DT", "ggplot2"))
+install.packages(c("shiny", "pheatmap", "DT", "ggplot2","shinycssloaders"))
 
 2️⃣ Ejecuta la app:
 shiny::runApp("app.R")
