@@ -1,4 +1,4 @@
-# 🧬 Shiny App – Cluster Heatmap Interactivo (Bioinformática v2.1)
+# 🧬 Shiny App – Cluster Heatmap Interactivo (Bioinformática)
 
 ![R Shiny](https://img.shields.io/badge/R-Shiny-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
