@@ -59,7 +59,7 @@ Incluye un archivo example_data.csv con 100 genes y 5 muestras simuladas, con 3 
 
 ### 👤 Autor
 
-Desarrollado por Oriol Chiva Hidalgo
+Desarrollado por **Oriol Chiva Hidalgo**
 ### 📧 Contacto: oriolchiva8@gmail.com / oriol.chiva.hidalgo@gmail.com
 
 
