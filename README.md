@@ -43,18 +43,24 @@ bioinfo-heatmap-app/
 ```r
 install.packages(c("shiny", "pheatmap", "DT", "ggplot2","shinycssloaders"))
 
-2️⃣ Ejecuta la app:
+```
+
+### 2️⃣ Ejecuta la app:
+
+```r
 shiny::runApp("app.R")
 
-3️⃣ Sube el archivo de ejemplo (example_data.csv) y pulsa Generar Heatmap.
-🧠 Datos de ejemplo
+```
+
+### 3️⃣ Sube el archivo de ejemplo (example_data.csv) y pulsa Generar Heatmap.
+### 🧠 Datos de ejemplo
 
 Incluye un archivo example_data.csv con 100 genes y 5 muestras simuladas, con 3 grupos de expresión distintos para mostrar patrones de clustering.
 
-👤 Autor
+### 👤 Autor
 
 Desarrollado por Oriol Chiva Hidalgo
-📧 Contacto: oriolchiva8@gmail.com / oriol.chiva.hidalgo@gmail.com
+### 📧 Contacto: oriolchiva8@gmail.com / oriol.chiva.hidalgo@gmail.com
 
 
 © 2025 – Proyecto educativo y de investigación bajo licencia MIT.
