@@ -27,11 +27,13 @@ Permite explorar datos, ajustar la visualización, cambiar la paleta de colores,
 ---
 
 ## 🧩 Estructura del proyecto
+```
 bioinfo-heatmap-app/
 │
 ├── app.R # Código principal de la app
 ├── example_data.csv # Datos de prueba (matriz de expresión)
 └── README.md # Descripción del proyecto
+```
 
 
 ---
